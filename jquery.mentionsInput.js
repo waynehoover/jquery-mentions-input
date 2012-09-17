@@ -32,7 +32,7 @@
       autocompleteListItemIcon   : _.template('<div class="icon <%= icon %>"></div>'),
       mentionsOverlay            : _.template('<div class="mentions"><div></div></div>'),
       mentionItemSyntax          : _.template('<%= trigger %>[<%= value %>](<%= type %>:<%= id %>)'),
-      mentionItemHighlight       : _.template('<strong><span><%= value %></span></strong>')
+      mentionItemHighlight       : _.template('<strong><span><%= trigger %><%= value %></span></strong>')
     }
   };
 
@@ -122,7 +122,7 @@
         // Merge in default trigger character,  if one not set
         _.defaults(mention, {trigger: settings.defaultTriggerChar});
         var textSyntax = settings.templates.mentionItemSyntax(mention);
-        syntaxMessage = syntaxMessage.replace(mention.value, textSyntax);
+        syntaxMessage = syntaxMessage.replace(mention.trigger+mention.value, textSyntax);
       });
 
       var mentionText = utils.htmlEncode(syntaxMessage);
@@ -164,7 +164,7 @@
       var regex = new RegExp("\\" + currentTriggerChar + currentDataQuery, "gi");
       regex.exec(currentMessage);
 
-      var startCaretPosition = regex.lastIndex - currentDataQuery.length - 1;
+      var startCaretPosition = regex.lastIndex - currentDataQuery.length;
       var currentCaretPosition = regex.lastIndex;
 
       var start = currentMessage.substr(0, startCaretPosition);
