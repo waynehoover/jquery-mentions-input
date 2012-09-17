@@ -40,5 +40,33 @@
         "name": "kenneth@auchenberg.dk",
         "avatar": "http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif",
         "type": "contact"
+    },
+    {
+        "id": "apple",
+        "name": "apple",
+        "avatar": "http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif",
+        "type": "tag",
+        "trigger": "#"
+    },
+    {
+        "id": "banana",
+        "name": "banana",
+        "avatar": "http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif",
+        "type": "tag",
+        "trigger": "#"
+    },
+    {
+        "id": "cherry",
+        "name": "cherry",
+        "avatar": "http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif",
+        "type": "tag",
+        "trigger": "#"
+    },
+    {
+        "id": "david",
+        "name": "david",
+        "avatar": "http://cdn0.4dots.com/i/customavatars/avatar7112_1.gif",
+        "type": "tag",
+        "trigger": "#"
     }
 ]

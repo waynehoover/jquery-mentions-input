@@ -18,6 +18,8 @@
     minChars      : 2,
     showAvatars   : true,
     elastic       : true,
+    display       : 'name',
+    defaultTriggerChar  : '@',
     classes       : {
       autoCompleteItemActive : "active"
     },
@@ -28,7 +30,7 @@
       autocompleteListItemAvatar : _.template('<img  src="<%= avatar %>" />'),
       autocompleteListItemIcon   : _.template('<div class="icon <%= icon %>"></div>'),
       mentionsOverlay            : _.template('<div class="mentions"><div></div></div>'),
-      mentionItemSyntax          : _.template('@[<%= value %>](<%= type %>:<%= id %>)'),
+      mentionItemSyntax          : _.template('<%= trigger %>[<%= value %>](<%= type %>:<%= id %>)'),
       mentionItemHighlight       : _.template('<strong><span><%= value %></span></strong>')
     }
   };
@@ -71,6 +73,9 @@
     var currentDataQuery;
 
     settings = $.extend(true, {}, defaultSettings, settings );
+    if(!_.isArray(settings.triggerChar)){
+      settings.triggerChar = [settings.triggerChar];
+    }
 
     function initTextarea() {
       elmInputBox = $(domInput);
@@ -150,9 +155,10 @@
     function addMention(mention) {
 
       var currentMessage = getInputBoxValue();
+      var currentTriggerChar = mention.trigger ? mention.trigger : settings.defaultTriggerChar;
 
       // Using a regex to figure out positions
-      var regex = new RegExp("\\" + settings.triggerChar + currentDataQuery, "gi");
+      var regex = new RegExp("\\" + currentTriggerChar + currentDataQuery, "gi");
       regex.exec(currentMessage);
 
       var startCaretPosition = regex.lastIndex - currentDataQuery.length - 1;
@@ -200,17 +206,24 @@
       hideAutoComplete();
     }
 
+    function checkTriggerChar(inputBuffer, triggerChar) {
+      var triggerCharIndex = _.lastIndexOf(inputBuffer, triggerChar);
+      if (triggerCharIndex > -1) {
+        currentDataQuery = inputBuffer.slice(triggerCharIndex + 1).join('');
+        currentDataQuery = utils.rtrim(currentDataQuery);
+        _.defer(_.bind(doSearch, this, currentDataQuery, triggerChar));
+      }
+    }
     function onInputBoxInput(e) {
       updateValues();
       updateMentionsCollection();
       hideAutoComplete();
+      var matchedChar = _.max(settings.triggerChar, function(character){
+        return _.lastIndexOf(inputBuffer, character);
+      });
 
-      var triggerCharIndex = _.lastIndexOf(inputBuffer, settings.triggerChar);
-      if (triggerCharIndex > -1) {
-        currentDataQuery = inputBuffer.slice(triggerCharIndex + 1).join('');
-        currentDataQuery = utils.rtrim(currentDataQuery);
-
-        _.defer(_.bind(doSearch, this, currentDataQuery));
+      if(matchedChar){
+        checkTriggerChar(inputBuffer, matchedChar);
       }
     }
 
@@ -316,7 +329,7 @@
 
         var elmListItem = $(settings.templates.autocompleteListItem({
           'id'      : utils.htmlEncode(item.id),
-          'display' : utils.htmlEncode(item.name),
+          'display' : utils.htmlEncode(item[settings.display]),
           'type'    : utils.htmlEncode(item.type),
           'content' : utils.highlightTerm(utils.htmlEncode((item.name)), query)
         })).attr('data-uid', itemUid);
@@ -342,11 +355,11 @@
       elmDropDownList.show();
     }
 
-    function doSearch(query) {
+    function doSearch(query, triggerChar) {
       if (query && query.length && query.length >= settings.minChars) {
         settings.onDataRequest.call(this, 'search', query, function (responseData) {
           populateDropdown(query, responseData);
-        });
+        }, triggerChar);
       }
     }
 
@@ -377,7 +390,6 @@
         if (!_.isFunction(callback)) {
           return;
         }
-
         var value = mentionsCollection.length ? elmInputBox.data('messageText') : getInputBoxValue();
         callback.call(this, value);
       },
