@@ -70,7 +70,7 @@
     var mentionsCollection = [];
     var autocompleteItemCollection = {};
     var inputBuffer = [];
-    var currentDataQuery;
+    var currentDataQuery = '';
 
     settings = $.extend(true, {}, defaultSettings, settings );
     if(!_.isArray(settings.triggerChar)){
@@ -118,6 +118,8 @@
       var syntaxMessage = getInputBoxValue();
 
       _.each(mentionsCollection, function (mention) {
+        // Merge in default trigger character,  if one not set
+        _.defaults(mention, {trigger: settings.defaultTriggerChar});
         var textSyntax = settings.templates.mentionItemSyntax(mention);
         syntaxMessage = syntaxMessage.replace(mention.value, textSyntax);
       });
