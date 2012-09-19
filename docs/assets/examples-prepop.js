@@ -2,6 +2,7 @@ $(function () {
 
   $('textarea.mentionprepop').mentionsInput({
     triggerChar: ['#', '@'],
+    defaultTriggerChar: '@',
     useCurrentVal: true,
     onDataRequest:function (mode, query, callback,triggerChar) {
       var data = [
