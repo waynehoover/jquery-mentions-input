@@ -1,8 +1,10 @@
 /*
  * Mentions Input
- * Version 1.0.2
+ * Version 1.0.3.dtime
  * Written by: Kenneth Auchenberg (Podio)
+ * Forked  by: David Haslem (dtime, inc.)
  *
+ * From: https://github.com/dtime/jquery-mentions-input
  * Using underscore.js
  *
  * License: MIT License - http://www.opensource.org/licenses/mit-license.php
