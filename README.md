@@ -17,5 +17,5 @@ with the following changes:
   trigger char is set.
 * Formatting now is of the form:
 
-  [@username](user:user_id) instead of @[username](user:user_id)
+  `[@username](user:user_id)` instead of `@[username](user:user_id)`
 
