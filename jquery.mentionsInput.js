@@ -31,8 +31,8 @@
       autocompleteListItemAvatar : _.template('<img  src="<%= avatar %>" />'),
       autocompleteListItemIcon   : _.template('<div class="icon <%= icon %>"></div>'),
       mentionsOverlay            : _.template('<div class="mentions"><div></div></div>'),
-      mentionItemSyntax          : _.template('<%= trigger %>[<%= value %>](<%= type %>:<%= id %>)'),
-      mentionItemHighlight       : _.template('<strong><span><%= trigger %><%= value %></span></strong>')
+      mentionItemSyntax          : _.template('[<%= value %>](<%= type %>:<%= id %>)'),
+      mentionItemHighlight       : _.template('<strong><span><%= value %></span></strong>')
     }
   };
 
@@ -122,7 +122,7 @@
         // Merge in default trigger character,  if one not set
         _.defaults(mention, {trigger: settings.defaultTriggerChar});
         var textSyntax = settings.templates.mentionItemSyntax(mention);
-        syntaxMessage = syntaxMessage.replace(mention.trigger+mention.value, textSyntax);
+        syntaxMessage = syntaxMessage.replace(mention.value, textSyntax);
       });
 
       var mentionText = utils.htmlEncode(syntaxMessage);
@@ -164,7 +164,7 @@
       var regex = new RegExp("\\" + currentTriggerChar + currentDataQuery, "gi");
       regex.exec(currentMessage);
 
-      var startCaretPosition = regex.lastIndex - currentDataQuery.length;
+      var startCaretPosition = regex.lastIndex - currentDataQuery.length - 1;
       var currentCaretPosition = regex.lastIndex;
 
       var start = currentMessage.substr(0, startCaretPosition);
@@ -313,8 +313,10 @@
 
       // Filter items that has already been mentioned
       var mentionValues = _.pluck(mentionsCollection, 'value');
+      var triggerChar = '';
       results = _.reject(results, function (item) {
-        return _.include(mentionValues, item.name);
+        triggerChar = item.trigger ? item.trigger : settings.defaultTriggerChar;
+        return _.include(mentionValues, triggerChar+item.name);
       });
 
       if (!results.length) {
@@ -328,7 +330,8 @@
       _.each(results, function (item, index) {
         var itemUid = _.uniqueId('mention_');
 
-        autocompleteItemCollection[itemUid] = _.extend({}, item, {value: item.name});
+        triggerChar = item.trigger ? item.trigger : settings.defaultTriggerChar;
+        autocompleteItemCollection[itemUid] = _.extend({}, item, {value: triggerChar+item.name});
 
         var elmListItem = $(settings.templates.autocompleteListItem({
           'id'      : utils.htmlEncode(item.id),
@@ -370,7 +373,7 @@
       if(currentVal){
         mentionsCollection = [];
         var mentionText = utils.htmlEncode(currentVal);
-        var regex = new RegExp("(" + settings.triggerChar.join('|') + ")\\[(.*?)\\]\\((.*?):(.*?)\\)", "gi");
+        var regex = new RegExp("\\[(" + settings.triggerChar.join('|') + "|)(.*?)\\]\\((.*?):(.*?)\\)", "gi");
         var match;
         var newMentionText = mentionText;
         while ((match = regex.exec(mentionText)) != null) {    // Find all matches in a string
@@ -378,7 +381,7 @@
             mentionsCollection.push({   // Btw: match[0] is the complete match
                 'id': match[4],
                 'type': match[3],
-                'value': match[2],
+                'value': match[1]+match[2],
                 'trigger': match[1]
             });
         }
