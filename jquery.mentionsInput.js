@@ -18,9 +18,9 @@
     minChars      : 2,
     showAvatars   : true,
     elastic       : true,
-    useCurrentVal : false,
+    useCurrentVal : true,
     display       : 'name',
-    defaultTriggerChar  : '@',
+    defaultTriggerChar  : '',
     classes       : {
       autoCompleteItemActive : "active"
     },
@@ -312,11 +312,10 @@
       elmAutocompleteList.show();
 
       // Filter items that has already been mentioned
-      var mentionValues = _.pluck(mentionsCollection, 'value');
+      var mentionValues = _.pluck(mentionsCollection, 'id');
       var triggerChar = '';
       results = _.reject(results, function (item) {
-        triggerChar = item.trigger ? item.trigger : settings.defaultTriggerChar;
-        return _.include(mentionValues, triggerChar+item.name);
+        return _.include(mentionValues, item.id);
       });
 
       if (!results.length) {
