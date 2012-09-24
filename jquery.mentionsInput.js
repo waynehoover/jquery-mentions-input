@@ -373,7 +373,7 @@
     function resetInput(currentVal) {
       if(currentVal){
         mentionsCollection = [];
-        var mentionText = utils.htmlEncode(currentVal);
+        var mentionText = currentVal;
         var regex = new RegExp("\\[(" + settings.triggerChar.join('|') + "|)(.*?)\\]\\((.*?):(.*?)\\)", "gi");
         var match;
         var newMentionText = mentionText;
