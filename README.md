@@ -5,6 +5,7 @@ This is a modified version of: http://podio.github.com/jquery-mentions-input
 
 with the following changes:
 
+* Adds onCaret support (enabled by default)
 * The text inside the textarea will be used and properly initialized if the
   textarea already has a value
 * Multiple trigger characters are allowed - set triggerChar to an array. We use
