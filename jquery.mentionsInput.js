@@ -161,18 +161,29 @@
     }
 
     function updateValues() {
-      var syntaxMessage = getInputBoxValue();
+      var remaining = getInputBoxValue();
+      var syntaxMessage = "";
 
-      _.each(mentionsCollection, function (mention) {
+      var orderedMentionsCollection = _.sortBy(mentionsCollection, function (a){ return a.approxIndex });
+
+      _.each(orderedMentionsCollection, function (mention) {
         // Merge in default trigger character,  if one not set
         _.defaults(mention, {trigger: settings.defaultTriggerChar});
         var textSyntax = settings.templates.mentionItemSyntax(mention);
-        syntaxMessage = syntaxMessage.replace(mention.value, textSyntax);
+        var parts = remaining.split(mention.value);
+
+        syntaxMessage += parts.shift();
+        if(parts.length > 0){
+          // Always two parts if a match, meaning there should be at least one
+          // part left after shift
+          syntaxMessage += textSyntax;
+        }
+        remaining = parts.join(mention.value);
       });
 
       var mentionText = utils.htmlEncode(syntaxMessage);
 
-      _.each(mentionsCollection, function (mention) {
+      _.each(orderedMentionsCollection, function (mention) {
         var formattedMention = _.extend({}, mention, {value: utils.htmlEncode(mention.value)});
         var textSyntax = settings.templates.mentionItemSyntax(formattedMention);
         var textHighlight = settings.templates.mentionItemHighlight(formattedMention);
@@ -208,10 +219,12 @@
       // Using a regex to figure out positions
       var regex = new RegExp("\\" + currentTriggerChar + currentDataQuery, "gi");
       var lastIndex = 0;
+      var caret = utils.getCaretPosition(elmInputBox[0]);
+
 
       while(regex.exec(currentMessage) != null){
         // Move last index unless we've passed the caret.
-        if(regex.lastIndex <= utils.getCaretPosition(elmInputBox[0])){
+        if(regex.lastIndex <= caret){
           lastIndex = regex.lastIndex;
         }
       }
@@ -219,10 +232,18 @@
       var startCaretPosition = lastIndex - currentDataQuery.length - 1;
       var currentCaretPosition = lastIndex;
 
+
       var start = currentMessage.substr(0, startCaretPosition);
       var end = currentMessage.substr(currentCaretPosition, currentMessage.length);
       var startEndIndex = (start + mention.value).length + 1;
-
+      mention.approxIndex = lastIndex;
+      _.each(mentionsCollection, function(oldMention){
+        if(oldMention.approxIndex >= caret){
+          // If the caret is in front of a mention, bump the index of the
+          // trailing mentions to approximate their new indexes.
+          oldMention.approxIndex = oldMention.approxIndex + mention.value.length;
+        }
+      });
       mentionsCollection.push(mention);
 
       // Cleaning before inserting the value, otherwise auto-complete would be triggered with "old" inputbuffer
