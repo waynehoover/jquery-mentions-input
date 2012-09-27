@@ -11,7 +11,6 @@
  */
 
 (function ($, _, undefined) {
-
   // This is taken straight from live (as of Sep 2012) GitHub code. The
   // technique is known around the web. Just google it. Github's is quite
   // succint though.
@@ -44,7 +43,7 @@
     useCurrentVal : true,
     display       : 'name',
     defaultTriggerChar  : '',
-    onCaret       : false,
+    onCaret       : true,
     classes       : {
       autoCompleteItemActive : "active"
     },
@@ -69,6 +68,27 @@
         return value;
       }
       return value.replace(new RegExp("(?![^&;]+;)(?!<[^<>]*)(" + term + ")(?![^<>]*>)(?![^&;]+;)", "gi"), "<b>$1</b>");
+    },
+
+    getCaretPosition: function (el) {
+      if (el.selectionStart) {
+        return el.selectionStart;
+      } else if (document.selection) {
+        el.focus();
+
+        var r = document.selection.createRange();
+        if (r == null) {
+          return 0;
+        }
+
+        var re = el.createTextRange(),
+            rc = re.duplicate();
+        re.moveToBookmark(r.getBookmark());
+        rc.setEndPoint('EndToStart', re);
+
+        return rc.text.length;
+      }
+      return 0;
     },
     setCaratPosition : function (domNode, caretPos) {
       if (domNode.createTextRange) {
@@ -118,6 +138,7 @@
       elmInputBox.bind('keydown', onInputBoxKeyDown);
       elmInputBox.bind('keypress', onInputBoxKeyPress);
       elmInputBox.bind('input', onInputBoxInput);
+      elmInputBox.bind('change', onInputBoxInput);
       elmInputBox.bind('click', onInputBoxClick);
       elmInputBox.bind('blur', onInputBoxBlur);
 
@@ -186,10 +207,17 @@
 
       // Using a regex to figure out positions
       var regex = new RegExp("\\" + currentTriggerChar + currentDataQuery, "gi");
-      regex.exec(currentMessage);
+      var lastIndex = 0;
 
-      var startCaretPosition = regex.lastIndex - currentDataQuery.length - 1;
-      var currentCaretPosition = regex.lastIndex;
+      while(regex.exec(currentMessage) != null){
+        // Move last index unless we've passed the caret.
+        if(regex.lastIndex <= utils.getCaretPosition(elmInputBox[0])){
+          lastIndex = regex.lastIndex;
+        }
+      }
+
+      var startCaretPosition = lastIndex - currentDataQuery.length - 1;
+      var currentCaretPosition = lastIndex;
 
       var start = currentMessage.substr(0, startCaretPosition);
       var end = currentMessage.substr(currentCaretPosition, currentMessage.length);
