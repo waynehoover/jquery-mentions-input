@@ -181,6 +181,8 @@
         remaining = parts.join(mention.value);
       });
 
+      syntaxMessage += remaining;
+
       var mentionText = utils.htmlEncode(syntaxMessage);
 
       _.each(orderedMentionsCollection, function (mention) {
