@@ -39,7 +39,6 @@
     onDataRequest : $.noop,
     minChars      : 2,
     showAvatars   : true,
-    elastic       : true,
     useCurrentVal : true,
     display       : 'name',
     defaultTriggerChar  : '',
@@ -142,10 +141,7 @@
       elmInputBox.bind('click', onInputBoxClick);
       elmInputBox.bind('blur', onInputBoxBlur);
 
-      // Elastic textareas, internal setting for the Dispora guys
-      if( settings.elastic ) {
-        elmInputBox.elastic();
-      }
+      elmInputBox.expandingTextarea();
 
     }
 
